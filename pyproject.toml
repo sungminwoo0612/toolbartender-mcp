@@ -1,0 +1,10 @@
+[project]
+name = "toolbartender-mcp"
+version = "0.1.0"
+description = "An MCP plan compiler that turns goals + enabled tools into safe, executable step plans."
+readme = "README.md"
+requires-python = ">=3.11.8"
+dependencies = [
+  "fastmcp",
+  "pydantic>=2",
+]
