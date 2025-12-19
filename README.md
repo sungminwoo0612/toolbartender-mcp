@@ -32,7 +32,6 @@ ToolBartender는 사용자의 자연어 요청을 **하나의 goal**로 받아,<
 - `required_confirmations`: 사용자 확인이 필요한 작업(특히 write 계열)
 - `execution_hint`: 실행 에이전트용 가이드
 
----
 
 ## Exposed MCP tools (this server)
 PlayMCP 등록 제약(정규식) 때문에 **ToolBartender가 노출하는 tool name은 ASCII로 고정**을 권장합니다.
@@ -47,7 +46,6 @@ PlayMCP 등록 제약(정규식) 때문에 **ToolBartender가 노출하는 tool 
 
 도구 I/O, 스키마, 예시는 `docs/02_tools.md` 참고.
 
----
 
 ## Quickstart
 ### 1) Local run
@@ -72,7 +70,7 @@ Inspector UI에서 서버 URL을 http://localhost:3333/mcp로 연결합니다.
 - PlayMCP → “새로운 MCP 서버 등록” → https://<public-host>/mcp 입력 → 임시 등록 → AI 채팅에 적용
 흐름은 기존 README에 이미 있습니다. 
 
----
+
 ## Docs
 - docs/00_quickstart.md : 5분 셋업
 - docs/01_concept.md : Planner MCP 컨셉 / 철학 / 로드맵
@@ -81,6 +79,5 @@ Inspector UI에서 서버 URL을 http://localhost:3333/mcp로 연결합니다.
 - docs/04_deploy.md : 배포(nginx/SSE 포함) + 도메인/Cloudflare 포인트
 - docs/05_troubleshooting.md : 405/핸드셰이크/SSE 관련 이슈 모음
 
----
 ## License
 MIT
