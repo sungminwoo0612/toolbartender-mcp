@@ -11,8 +11,8 @@ ToolBartender는 사용자의 자연어 요청을 **하나의 goal**로 받아,<
 
 
 ## PoC Endpoint
-`https://mcp.toolbartender.dev/mcp` (Streamable HTTP / SSE)<br>  
-기존 README에도 PoC 링크로 `http://mcp.toolbartender.dev/mcp`가 기재되어 있습니다.<br>
+`http://mcp.toolbartender.dev/mcp` (Streamable HTTP / SSE)<br>  
+
 
 
 ## Keywords
