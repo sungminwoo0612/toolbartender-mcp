@@ -1,64 +1,85 @@
-# ToolBartender (MCP)
+# ToolBartender 🍸
+**Planner MCP that turns natural-language goals into safe, structured execution plans (JSON)**
 
-PlayMCP에서 여러 MCP 도구를 **안전하게 조합**해서 실행할 수 있도록,<br>
-`goal` + `available_tools`를 입력으로 받아 **실행 계획(plan)** 을 만드는 MCP 서버입니다.
+ToolBartender는 사용자의 자연어 요청을 **하나의 goal**로 받아,
+**어떤 MCP 도구를 어떤 순서로 호출해야 하는지** 실행 계획(plan)을 생성하는 **Planner MCP**입니다.  
+실제 도구 실행은 하지 않고, LLM/실행 에이전트가 **안전하고 예측 가능하게** 실행하도록
+`steps / assumptions / required_confirmations / execution_hint`를 포함한 JSON을 반환합니다.
 
-## PoC 링크
-http://mcp.toolbartender.dev/mcp
+> 한 줄 요약: **ToolBartender = “도구 실행”이 아니라 “도구 조합 계획”을 만드는 MCP**
 
-## 제공 도구
+---
 
-- `plan.create`
-  - 입력: `{ goal: str, available_tools: [str] }`
-  - 출력: `{ plan: { plan_id, intent, steps, assumptions, required_confirmations, execution_hint } }`
+## PoC Endpoint
+- `https://mcp.toolbartender.dev/mcp` (Streamable HTTP / SSE)  
+  기존 README에도 PoC 링크로 `http://mcp.toolbartender.dev/mcp`가 기재되어 있습니다. :contentReference[oaicite:3]{index=3}
 
-- `plan.validate`
-  - 입력: `{ plan: Plan, available_tools: [str] }`
-  - 출력: `{ ok, issues, missing_tools }`
+---
 
-- `plan.render_prompt`
-  - 입력: `{ plan: Plan, available_tools: [str] }`
-  - 출력: `{ ok, missing_tools, prompt }`
-  - LLM 실행 에이전트가 **step을 순서대로 호출**하게 만드는 지시문을 생성합니다.
+## Keywords
+`planner`, `safe execution`, `tool orchestration`, `PlayMCP`
 
-- `plan.explain`
-  - 입력: `{ plan: Plan }`
-  - 출력: `{ summary }`
-  - 사용자에게 “무슨 도구를 왜 쓰는지 / 무엇을 확인해야 하는지”를 요약해줍니다.
+## What it does
+다음과 같은 복합 요청을 하나의 goal로 받아 plan을 생성합니다. :contentReference[oaicite:4]{index=4}
+- 이동 계획 (예: “오늘 오후 8시 판교에서 강남으로 이동”)
+- 일정 조회/조정
+- 정보 탐색 및 요약
+- 결과 전달(이메일/메신저 등)
 
-## 로컬 실행
+### Output Plan includes
+- `steps`: 사용할 MCP 도구 + 실행 순서
+- `assumptions`: 전제 조건
+- `required_confirmations`: 사용자 확인이 필요한 작업(특히 write 계열)
+- `execution_hint`: 실행 에이전트용 가이드
 
+---
+
+## Exposed MCP tools (this server)
+PlayMCP 등록 제약(정규식) 때문에 **ToolBartender가 노출하는 tool name은 ASCII로 고정**을 권장합니다.
+
+- `plan_create` : goal + available_tools → plan 생성
+- `plan_validate`: plan이 현재 컨텍스트(available_tools)에서 실행 가능한지 검증
+- `plan_render_prompt`: LLM 실행 에이전트가 steps를 “순서대로” 호출하도록 프롬프트 생성
+- `plan_explain`: 사용자에게 plan을 쉽게 설명
+
+> 내부 `plan.steps[*].tool_name`은 다른 MCP들의 도구 이름이므로(예: `calendar.read`, `map.route`) 그대로 두는 구조가 자연스럽습니다. :contentReference[oaicite:5]{index=5}
+
+도구 I/O, 스키마, 예시는 `docs/02_tools.md` 참고.
+
+---
+
+## Quickstart
+### 1) Local run
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
 python src/main.py
-# 기본: http://localhost:3333/mcp
+# Open http://localhost:3333/mcp in your browser
 ```
 
-서버는 Streamable HTTP로 뜹니다. FastMCP는 기본 경로가 `/mcp/`이고,<br> 
-이 프로젝트는 `path="/mcp"`로 맞춰둔 상태입니다.
-
-## Inspector로 로컬 테스트 (PlayMCP 역할 흉내)
-
-MCP Inspector는 Node 기반 도구입니다. GitHub 문서 기준으로 아래처럼 실행합니다.
-
+### 2) Inspector로 로컬 테스트
 ```bash
-# UI 실행
 npx @modelcontextprotocol/inspector
-# 브라우저: http://localhost:6274
+# http://localhost:6274
 ```
+Inspector UI에서 서버 URL을 http://localhost:3333/mcp로 연결합니다. 
 
-Inspector UI에서 **서버 URL**을 `http://localhost:3333/mcp` 로 연결해<br>
-도구 목록/스키마/호출을 확인합니다.
+### 3) PlayMCP 통합 테스트
+- public URL 필요(ngrok/배포)
+- PlayMCP → “새로운 MCP 서버 등록” → https://<public-host>/mcp 입력 → 임시 등록 → AI 채팅에 적용
+흐름은 기존 README에 이미 있습니다. 
 
-## PlayMCP 등록/테스트 흐름
+---
+## Docs
+- docs/00_quickstart.md : 5분 셋업
+- docs/01_concept.md : Planner MCP 컨셉 / 철학 / 로드맵
+- docs/02_tools.md : tool별 입력/출력/예시 + naming 규칙
+- docs/03_playmcp.md : PlayMCP 등록 팁 / 심사 관점 체크리스트
+- docs/04_deploy.md : 배포(nginx/SSE 포함) + 도메인/Cloudflare 포인트
+- docs/05_troubleshooting.md : 405/핸드셰이크/SSE 관련 이슈 모음
 
-1) 서버를 외부에서 접근 가능한 URL로 공개 (예: ngrok, Cloud Run 등)  
-2) PlayMCP → “새로운 MCP 서버 등록” → MCP Server URL에 `https://<public-host>/mcp` 입력  
-3) “임시 등록” 상태로 저장 → “MCP 상세 미리보기” → “AI 채팅에 적용”으로 **나만 테스트**  
-4) 충분히 검증되면 심사 요청 → 게시
-
-> 중요한 점: “내 서버가 PlayMCP 도구함 목록을 API로 긁어오는 구조”가 아니라,
-> PlayMCP(클라이언트)가 “내 서버 URL로 도구 호출”을 하는 구조입니다.
+---
+## License
+MIT
