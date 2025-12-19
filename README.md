@@ -1,26 +1,26 @@
 # ToolBartender 🍸
 **Planner MCP that turns natural-language goals into safe, structured execution plans (JSON)**
 
-ToolBartender는 사용자의 자연어 요청을 **하나의 goal**로 받아,
-**어떤 MCP 도구를 어떤 순서로 호출해야 하는지** 실행 계획(plan)을 생성하는 **Planner MCP**입니다.  
-실제 도구 실행은 하지 않고, LLM/실행 에이전트가 **안전하고 예측 가능하게** 실행하도록
-`steps / assumptions / required_confirmations / execution_hint`를 포함한 JSON을 반환합니다.
+ToolBartender는 사용자의 자연어 요청을 **하나의 goal**로 받아,<br>
+**어떤 MCP 도구를 어떤 순서로 호출해야 하는지** 실행 계획(plan)을 생성하는 **Planner MCP**입니다.<br>
+
+실제 도구 실행은 하지 않고, LLM/실행 에이전트가 **안전하고 예측 가능하게** 실행하도록<br>
+`steps / assumptions / required_confirmations / execution_hint`를 포함한 JSON을 반환합니다.<br>
 
 > 한 줄 요약: **ToolBartender = “도구 실행”이 아니라 “도구 조합 계획”을 만드는 MCP**
 
----
 
 ## PoC Endpoint
-- `https://mcp.toolbartender.dev/mcp` (Streamable HTTP / SSE)  
-  기존 README에도 PoC 링크로 `http://mcp.toolbartender.dev/mcp`가 기재되어 있습니다. :contentReference[oaicite:3]{index=3}
+`https://mcp.toolbartender.dev/mcp` (Streamable HTTP / SSE)<br>  
+기존 README에도 PoC 링크로 `http://mcp.toolbartender.dev/mcp`가 기재되어 있습니다.<br>
 
----
 
 ## Keywords
 `planner`, `safe execution`, `tool orchestration`, `PlayMCP`
 
+
 ## What it does
-다음과 같은 복합 요청을 하나의 goal로 받아 plan을 생성합니다. :contentReference[oaicite:4]{index=4}
+다음과 같은 복합 요청을 하나의 goal로 받아 plan을 생성합니다.
 - 이동 계획 (예: “오늘 오후 8시 판교에서 강남으로 이동”)
 - 일정 조회/조정
 - 정보 탐색 및 요약
@@ -42,7 +42,8 @@ PlayMCP 등록 제약(정규식) 때문에 **ToolBartender가 노출하는 tool 
 - `plan_render_prompt`: LLM 실행 에이전트가 steps를 “순서대로” 호출하도록 프롬프트 생성
 - `plan_explain`: 사용자에게 plan을 쉽게 설명
 
-> 내부 `plan.steps[*].tool_name`은 다른 MCP들의 도구 이름이므로(예: `calendar.read`, `map.route`) 그대로 두는 구조가 자연스럽습니다. :contentReference[oaicite:5]{index=5}
+> 내부 `plan.steps[*].tool_name`은 다른 MCP들의 도구 이름이므로
+> (예: `calendar.read`, `map.route`) 그대로 두는 구조가 자연스럽습니다.
 
 도구 I/O, 스키마, 예시는 `docs/02_tools.md` 참고.
 
