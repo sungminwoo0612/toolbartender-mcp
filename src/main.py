@@ -107,13 +107,17 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool(name="plan.create", description="Convert user goal + available_tools into a structured MCP execution plan.")
+@mcp.tool(
+    name="plan.create", 
+    description="사용자의 복합 자연어 목표에서 실행 순서와 MCP 도구 목록을 추출해 단계별 계획(JSON)을 생성합니다.",
+)
 def plan_create(input: PlanCreateInput) -> PlanCreateOutput:
     plan = create_plan(goal=input.goal, available_tools=input.available_tools)
     return PlanCreateOutput(plan=plan)
 
 
-@mcp.tool(name="plan.validate", description="Validate whether a plan is executable with the currently available tools.")
+
+@mcp.tool(name="plan.validate", description="생성된 실행 계획(plan)이 현재 사용 가능한 MCP 도구로 실제 실행 가능한지 검증합니다. 필요한 도구가 누락되었거나, 실행 전에 사용자 확인이 필요한 작업이 있는지 등을 점검하여 실행 가능 여부와 주의사항(issues), 누락된 도구 목록을 반환합니다.")
 def plan_validate(input: PlanValidateInput) -> PlanValidateOutput:
     available = set(input.available_tools or [])
     used = [s.tool_name for s in input.plan.steps]
@@ -121,11 +125,11 @@ def plan_validate(input: PlanValidateInput) -> PlanValidateOutput:
 
     issues: List[str] = []
     if not available:
-        issues.append("available_tools is empty: no tools are enabled, so the plan cannot be executed in this context.")
+        issues.append("available_tools가 비어 있습니다: 활성화된 도구가 없으므로, 해당 환경에서는 계획을 실행할 수 없습니다.")
     if missing:
-        issues.append(f"Missing tools: {', '.join(missing)}")
+        issues.append(f"누락된 도구: {', '.join(missing)}")
     if not input.plan.steps:
-        issues.append("plan.steps is empty: nothing to execute (possibly because required tools were not enabled).")
+        issues.append("plan.steps가 비어 있습니다: 실행할 단계가 없습니다 (필요한 도구가 활성화되지 않은 것일 수 있습니다).")
 
     ok = (len(missing) == 0) and bool(available) and bool(input.plan.steps)
     return PlanValidateOutput(ok=ok, issues=issues, missing_tools=missing)
@@ -133,7 +137,10 @@ def plan_validate(input: PlanValidateInput) -> PlanValidateOutput:
 
 @mcp.tool(
     name="plan.render_prompt",
-    description="Render an execution prompt so an LLM executes plan.steps sequentially with safety gates.",
+    description=(
+        "실행 에이전트나 LLM이 계획(plan)을 안전하게 실행할 수 있도록 실행용 프롬프트를 생성합니다. "
+        "도구 사용 규칙, 실행 순서, 오류 발생 시 대응 방법 등 안전한 실행을 위한 안내 문장을 제공합니다."
+    ),
 )
 def plan_render_prompt(input: PlanRenderPromptInput) -> PlanRenderPromptOutput:
     plan = input.plan
@@ -205,9 +212,10 @@ Execution hint (from plan):
     return PlanRenderPromptOutput(ok=ok, missing_tools=missing, prompt=prompt)
 
 
+
 @mcp.tool(
     name="plan.explain",
-    description="Explain a plan for the user: what tools will be used, why, and what confirmations are needed.",
+    description="실행 계획을 사용자에게 한국어로 설명합니다: 어떤 도구를 왜 사용하는지, 필요한 확인 사항은 무엇인지 안내합니다.",
 )
 def plan_explain(input: PlanExplainInput) -> PlanExplainOutput:
     plan = input.plan
@@ -216,7 +224,7 @@ def plan_explain(input: PlanExplainInput) -> PlanExplainOutput:
     lines.append(f"목표: {plan.intent}")
 
     if not plan.steps:
-        lines.append("실행할 step이 없습니다. (available_tools가 비어 있거나, goal 파싱이 실패했을 수 있습니다.)")
+        lines.append("실행할 단계가 없습니다. (사용 가능한 도구 목록이 비었거나, 목표(goal) 해석에 실패한 경우일 수 있습니다.)")
     else:
         lines.append("실행 단계:")
         for i, s in enumerate(plan.steps, 1):
