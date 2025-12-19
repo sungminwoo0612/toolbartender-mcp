@@ -17,7 +17,7 @@ jobs:
           set -e
           
           cd ~
-          source .toolbartender/bin/activate
+          source .toolbartender-venv/bin/activate
           pip install -r ~/toolbartender-mcp/requirements.txt
           
           cd ~/toolbartender-mcp
