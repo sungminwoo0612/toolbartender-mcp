@@ -15,7 +15,7 @@ jobs:
       - name: Deploy on EC2 (self-hosted)
         run: |
           set -e
-          cd /opt/toolbartender-mcp
+          cd ~/toolbartender-mcp
           git fetch --all
           git reset --hard origin/main
           source .venv/bin/activate
