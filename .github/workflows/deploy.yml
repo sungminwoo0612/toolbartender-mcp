@@ -15,11 +15,15 @@ jobs:
       - name: Deploy on EC2 (self-hosted)
         run: |
           set -e
+          
+          cd ~
+          source .toolbartender/bin/activate
+          pip install -r ~/toolbartender-mcp/requirements.txt
+          
           cd ~/toolbartender-mcp
           git fetch --all
           git reset --hard origin/main
-          source .venv/bin/activate
-          pip install -r requirements.txt
+          
           sudo systemctl restart toolbartender
           sudo systemctl status toolbartender --no-pager
       
